@@ -1,7 +1,5 @@
 import { EntityRepository, Repository, getConnection } from "typeorm";
 import { User } from './entities/user.entity';
-import { CreateUserDto } from "./dto/create-user.dto";
-import { SigninUserDto } from "./dto/signin-user.dto";
 import mysql from '../util/dbconfig';
 
 
@@ -40,7 +38,7 @@ export class UserRepository extends Repository<User>{
 
 
   async signinORM(user_id: string, user_password: string): Promise<any> {
-    const result = await getConnection().createQueryBuilder()
+    const [result] = await getConnection().createQueryBuilder()
       .subQuery()
       .select(['user_name, user_nickname, user_phone_number'])
       .from(User, 't_user')

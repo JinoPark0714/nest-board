@@ -1,40 +1,34 @@
 import { Injectable } from '@nestjs/common';
-import * as jwt from 'jsonwebtoken';
-
-interface User{
-  id : string;
-  name : string;
-}
-
+import { UserService } from '../user/user.service';
+import { JwtService } from '@nestjs/jwt';
+import { SigninUserDto } from '../user/dto/signin-user.dto';
+import { jwtConstants } from './constants';
 
 @Injectable()
 export class AuthService{
-  constructor(){}
-  async validateUser(userId : string, userPassword : string) : Promise<any>{
-    return jwt.sign({
-      foo : "bar",
-      bar : "foo"
-    },"secret", {algorithm : 'RS256'});
-  }
+  constructor(
+    private readonly jwtService : JwtService
+    ){}
 
-  sign(userId : string) : string {
+  async sign(user_id : string, user_password : string){
     const payload = {
-      id : userId,
-      role : 'test'
+      user_id : user_id,
+      user_password : user_password
     };
-
-    return jwt.sign(payload, "secret", {
-      algorithm : 'HS256',
-      expiresIn : '1h'
-    });
+    return {
+      access_token: this.jwtService.sign(payload)
+    };
   }
-  verify(token : any){
+
+  verify(authorization : string){
+    let isVerified = null;
     try {
-      const decoded = jwt.verify(token, "secret");
-      
+      const token = authorization.replace('Bearer ', '');
+      isVerified = this.jwtService.verify(token);
+      return true;
     } catch (error) {
-      
+      console.log(error);
+      return false;
     }
   }
-
 }
