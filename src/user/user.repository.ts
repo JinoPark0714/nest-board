@@ -6,9 +6,10 @@ import mysql from '../util/dbconfig';
 @EntityRepository(User)
 export class UserRepository extends Repository<User>{
 
+  // 회원 가입 (유저 생성)
   async signup(userInfo: any): Promise<any> {
     try {
-      const database = await mysql.getConnection();
+      const mysqlConnection = await mysql.getConnection();
       const query = `
         INSERT INTO t_user(
           user_id,
@@ -20,7 +21,7 @@ export class UserRepository extends Repository<User>{
           ?, ?, ?, ?, ?
         );
       `;
-      const [result] = await database.query(query, [
+      const [result] = await mysqlConnection.query(query, [
         userInfo.user_id,
         userInfo.user_password,
         userInfo.user_name,
@@ -28,7 +29,7 @@ export class UserRepository extends Repository<User>{
         userInfo.user_phone_number
       ]);
       const { affectedRows } = JSON.parse(JSON.stringify(result));
-      database.release();
+      mysqlConnection.release();
       return affectedRows;
     } catch (error) {
       const { message, code, errno } = error;
@@ -36,7 +37,7 @@ export class UserRepository extends Repository<User>{
     }
   }
 
-
+  // 로그인
   async signinORM(user_id: string, user_password: string): Promise<any> {
     const [result] = await getConnection().createQueryBuilder()
       .subQuery()
@@ -48,38 +49,40 @@ export class UserRepository extends Repository<User>{
     return result;
   }
 
-  async signin(user_id: string, user_password: string): Promise<any> {
+  // 회원 정보 수정
+  async updateUser(userInfo: Array<any>) :Promise<any> {
     try {
-      const queryParams = [user_id, user_password];
-      const database = await mysql.getConnection();
+      const mysqlConnection = await mysql.getConnection();
       const query = `
-        SELECT 
-          user_name,
-          user_nickname,
-          user_phone_number
-        FROM t_user
-        WHERE user_id = ?
-        AND user_password = ?
+        UPDATE t_user
+        SET 
+          user_name = ?,
+          user_nickname = ?,
+          user_phone_number = ?
+        WHERE
+          user_id = ?
       `;
-      const [result] = await database.query(query, queryParams);
-      database.release();
+      const [result] = await mysqlConnection.query(query, userInfo);
+      mysqlConnection.release();
       return result;
     } catch (error) {
       const { message, code, errno } = error;
+      console.log(message, code, errno);
       return { message, code, errno };
     }
   }
 
+  // 회원 탈퇴 (유저 삭제)
   async deleteUser(user_id: string): Promise<any> {
     try {
-      const database = await mysql.getConnection();
+      const mysqlConnection = await mysql.getConnection();
       const query = `
         DELETE
-        FROM t_user t
-        WHERE t.user_id = ?
+        FROM t_user
+        WHERE user_id = ?
       `;
-      const result = await database.query(query, [user_id]);
-      database.release();
+      const [result] = await mysqlConnection.query(query, [user_id]);
+      mysqlConnection.release();
       return result;
     } catch (error) {
       const { message, code, errno } = error;

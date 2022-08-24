@@ -14,7 +14,7 @@ export class BoardRepository extends Repository<Board>{
   ) : Promise<any>{
     try {
       const queryParams = [userId, boardTitle, boardText, boardDate];
-      const database = await mysql.getConnection();
+      const mysqlConnection = await mysql.getConnection();
       const query = `
         INSERT INTO t_board(
           user_id,
@@ -25,8 +25,8 @@ export class BoardRepository extends Repository<Board>{
           ?, ?, ?, ?
         )
       `;
-      const [result] = await database.query(query, queryParams);
-      database.release();
+      const [result] = await mysqlConnection.query(query, queryParams);
+      mysqlConnection.release();
       return result;
     } catch (error) {
       const {message, code, errno} = error;
@@ -43,7 +43,7 @@ export class BoardRepository extends Repository<Board>{
   ) : Promise<any>{
     try {
       const queryParams = [boardTitle, boardText, boardDate, userId];
-      const database = await mysql.getConnection();
+      const mysqlConnection = await mysql.getConnection();
       const query = `
         UPDATE t_board
         SET 
@@ -52,8 +52,8 @@ export class BoardRepository extends Repository<Board>{
           board_date = ?
         WHERE user_id = ?
       `;
-      const [result] = await database.query(query, queryParams);
-      database.release();
+      const [result] = await mysqlConnection.query(query, queryParams);
+      mysqlConnection.release();
       return result;
     } catch (error) {
       const {message, code, errno} = error;

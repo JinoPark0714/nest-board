@@ -1,8 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { SigninUserDto } from '../user/dto/signin-user.dto';
-import { jwtConstants } from './constants';
 
 @Injectable()
 export class AuthService{
@@ -10,7 +8,8 @@ export class AuthService{
     private readonly jwtService : JwtService
     ){}
 
-  async sign(user_id : string, user_password : string){
+  async sign(signinUserDto : SigninUserDto){
+    const {user_id, user_password} = signinUserDto;
     const payload = {
       user_id : user_id,
       user_password : user_password
@@ -21,14 +20,17 @@ export class AuthService{
   }
 
   verify(authorization : string){
-    let isVerified = null;
+    let isVerified = false;
     try {
       const token = authorization.replace('Bearer ', '');
-      isVerified = this.jwtService.verify(token);
-      return true;
+      const userInfo = this.jwtService.verify(token);
+      delete userInfo.user_password;
+      return userInfo;
     } catch (error) {
       console.log(error);
-      return false;
+      isVerified = false;
     }
+    return isVerified;
   }
+
 }
