@@ -8,15 +8,13 @@ export class AuthService{
     private readonly jwtService : JwtService
     ){}
 
-  async sign(signinUserDto : SigninUserDto){
+  sign(signinUserDto : SigninUserDto) : string{
     const {user_id, user_password} = signinUserDto;
     const payload = {
       user_id : user_id,
       user_password : user_password
     };
-    return {
-      access_token: this.jwtService.sign(payload)
-    };
+    return this.jwtService.sign(payload);
   }
 
   verify(authorization : string){
