@@ -1,4 +1,4 @@
-import { EntityRepository, Repository, getConnection } from "typeorm";
+import { EntityRepository, Repository, getConnection, ReturningStatementNotSupportedError } from "typeorm";
 import { User } from './entities/user.entity';
 import mysql from '../util/dbconfig';
 
@@ -45,6 +45,18 @@ export class UserRepository extends Repository<User>{
       .from(User, 't_user')
       .where('user_id = :user_id', { user_id: user_id })
       .andWhere('user_password = :user_password', { user_password: user_password })
+      .execute();
+    return result;
+  }
+
+  // 닉네임 찾기
+  async findNickname(user_id : string, user_password : string) : Promise<any> {
+    const [result] = await getConnection().createQueryBuilder()
+      .subQuery()
+      .select(['user_nickname'])
+      .from(User, 't_user')
+      .where('user_id = :user_id', {user_id : user_id})
+      .andWhere('user_password = :user_password', {user_password : user_password})
       .execute();
     return result;
   }

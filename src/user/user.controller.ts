@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Delete, UseGuards, Put, Patch, Req } from '@nestjs/common';
+import { Controller, Post, Body, Delete, UseGuards, Put, Patch, Req, Res } from '@nestjs/common';
 import { UserService } from './user.service';
 import { ApiTags, ApiOperation, ApiCreatedResponse } from '@nestjs/swagger';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -7,7 +7,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { LocalAuthGuard } from '../auth/guard/local-auth.guard';
 import { AuthService } from '../auth/auth.service';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 
 @Controller('user')
 @ApiTags('User API')
@@ -15,7 +15,7 @@ export class UserController {
   constructor(
     private readonly userService: UserService,
     private readonly authService: AuthService
-  ) {}
+  ) { }
 
   // 회원 가입 (유저 생성)
   @Post()
@@ -30,16 +30,41 @@ export class UserController {
 
   // 로그인, 성공 시 jwt 토큰 발급
   @Post('signin')
-  @UseGuards(LocalAuthGuard)
   @ApiOperation({ summary: `signin User API`, description: `Sign in` })
   @ApiCreatedResponse({ description: `Sign in`, type: SigninUserDto })
-  async signin(@Body() signinUserDto: SigninUserDto) {
+  async signin(@Body() signinUserDto: SigninUserDto, @Res() response: Response) {
     console.log("User API signin");
-    const user = await this.userService.signin(signinUserDto);
-    if (user)
-      return this.authService.sign(signinUserDto);
+    const user_nickname = await this.userService.findNickname(signinUserDto);
+    if (user_nickname) {
+      const access_token = this.authService.sign(user_nickname);
+      response.setHeader("Authorization", access_token);
+      return response.status(201).json({
+        status: 201,
+        message: 'Login'
+      });
+    }
     return null;
   }
+
+  // 2022-08-25 1640 코드 보존
+  // 로그인, 성공 시 jwt 토큰 발급
+  // @Post('signin')
+  // @UseGuards(LocalAuthGuard)
+  // @ApiOperation({ summary: `signin User API`, description: `Sign in` })
+  // @ApiCreatedResponse({ description: `Sign in`, type: SigninUserDto })
+  // async signin(@Body() signinUserDto: SigninUserDto, @Res() response: Response) {
+  //   console.log("User API signin");
+  //   const userNickname = await this.userService.findNickname(signinUserDto);
+  //   if (userNickname) {
+  //     const access_token = this.authService.sign(signinUserDto);
+  //     response.setHeader("Authorization", access_token);
+  //     return response.status(201).json({
+  //       status: 201,
+  //       message: 'Login'
+  //     });
+  //   }
+  //   return null;
+  // }
 
 
   // 회원 정보 수정
@@ -49,9 +74,18 @@ export class UserController {
   @ApiCreatedResponse({ description: `Update User`, type: null })
   updateUser(@Req() request: Request, @Body() updateUserDto: UpdateUserDto) {
     console.log("User API updateUser");
-    const { authorization } = request.headers;
-    const { user_id } = this.authService.verify(authorization);
-    return this.userService.updateUser(updateUserDto, user_id);
+    const user_nickname = this.authService.getUserNickname(request);
+    return this.userService.updateUser(updateUserDto, user_nickname);
+  }
+
+  // 비밀번호 변경
+  @Patch()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: `Update password User API`, description: `Update password` })
+  @ApiCreatedResponse({ description: `Update password` })
+  updatePassword(@Req() request: Request) {
+    console.log("User API updatePassword");
+    const user_nickname = this.authService.getUserNickname(request);
   }
 
   // 회원 탈퇴 (유저 삭제)
@@ -61,8 +95,7 @@ export class UserController {
   @ApiCreatedResponse({ description: `delete` })
   deleteUser(@Req() request: Request) {
     console.log("User API deleteUser");
-    const { authorization } = request.headers;
-    const { user_id } = this.authService.verify(authorization);
-    return this.userService.deleteUser(user_id);
+    const user_nickname = this.authService.getUserNickname(request);
+    return this.userService.deleteUser(user_nickname);
   }
 }
