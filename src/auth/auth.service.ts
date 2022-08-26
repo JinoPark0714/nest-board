@@ -22,7 +22,6 @@ export class AuthService {
     try {
       const token = authorization.replace('Bearer ', '');
       const userInfo = this.jwtService.verify(token);
-      console.log(userInfo);
       return userInfo;
     } catch (error) {
       console.log(error);

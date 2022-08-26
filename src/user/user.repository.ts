@@ -6,7 +6,11 @@ import mysql from '../util/dbconfig';
 @EntityRepository(User)
 export class UserRepository extends Repository<User>{
 
-  // 회원 가입 (유저 생성)
+  /**
+   * 유저 생성
+   * @param userInfo 회원 가입 정보
+   * @returns 데이터베이스 반영 유무
+   */
   async signup(userInfo: any): Promise<any> {
     try {
       const mysqlConnection = await mysql.getConnection();
@@ -28,16 +32,20 @@ export class UserRepository extends Repository<User>{
         userInfo.user_nickname,
         userInfo.user_phone_number
       ]);
-      const { affectedRows } = JSON.parse(JSON.stringify(result));
       mysqlConnection.release();
-      return affectedRows;
+      return result;
     } catch (error) {
       const { message, code, errno } = error;
       return { message, code, errno };
     }
   }
 
-  // 로그인
+  /**
+   * 로그인
+   * @param user_id 아이디
+   * @param user_password 패스워드
+   * @returns 유저 정보
+   */
   async signinORM(user_id: string, user_password: string): Promise<any> {
     const [result] = await getConnection().createQueryBuilder()
       .subQuery()
@@ -49,7 +57,12 @@ export class UserRepository extends Repository<User>{
     return result;
   }
 
-  // 닉네임 찾기
+  /**
+   * 로그인
+   * @param user_id 아이디
+   * @param user_password 패스워드
+   * @returns 닉네임
+   */
   async findNickname(user_id : string, user_password : string) : Promise<any> {
     const [result] = await getConnection().createQueryBuilder()
       .subQuery()
@@ -61,7 +74,12 @@ export class UserRepository extends Repository<User>{
     return result;
   }
 
-  // 회원 정보 수정
+
+  /**
+   * 회원 정보 수정
+   * @param userInfo 수정할 회원 정보 
+   * @returns 데이터베이스 반영 유무
+   */
   async updateUser(userInfo: Array<any>) :Promise<any> {
     try {
       const mysqlConnection = await mysql.getConnection();
@@ -84,16 +102,20 @@ export class UserRepository extends Repository<User>{
     }
   }
 
-  // 회원 탈퇴 (유저 삭제)
-  async deleteUser(user_id: string): Promise<any> {
+  /**
+   * 유저 삭제
+   * @param user_nickname 닉네임 
+   * @returns 데이터베이스 반영 유무
+   */
+  async deleteUser(user_nickname: string): Promise<any> {
     try {
       const mysqlConnection = await mysql.getConnection();
       const query = `
         DELETE
         FROM t_user
-        WHERE user_id = ?
+        WHERE user_nickname = ?
       `;
-      const [result] = await mysqlConnection.query(query, [user_id]);
+      const [result] = await mysqlConnection.query(query, [user_nickname]);
       mysqlConnection.release();
       return result;
     } catch (error) {

@@ -4,7 +4,6 @@ import { ApiTags, ApiOperation, ApiCreatedResponse } from '@nestjs/swagger';
 import { CreateUserDto } from './dto/create-user.dto';
 import { SigninUserDto } from './dto/signin-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { LocalAuthGuard } from '../auth/guard/local-auth.guard';
 import { AuthService } from '../auth/auth.service';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 import { Request, Response } from 'express';
@@ -17,18 +16,37 @@ export class UserController {
     private readonly authService: AuthService
   ) { }
 
-  // 회원 가입 (유저 생성)
+  /**
+   * 회원 가입 (유저 생성)
+   * @param createUserDto 회원 생성 정보
+   * @param response 응답 객체
+   * @returns 회원 가입 성공 유무
+   */
   @Post()
   @ApiOperation({ summary: `signup User API`, description: `Create User` })
   @ApiCreatedResponse({ description: `Create User`, type: CreateUserDto })
-  signup(@Body() createUserDto: CreateUserDto) {
+  signup(@Body() createUserDto: CreateUserDto, @Res() response : Response) {
     console.log("User API signup");
-    const { user_id, user_password, user_name, user_nickname, user_phone_number } = createUserDto;
-    return this.userService.signup(user_id, user_password, user_name, user_nickname, user_phone_number);
+    const isCreated = this.userService.signup(createUserDto);
+    if(isCreated){
+      return response.status(201).json({
+        status : 201,
+        message : "user created"
+      });
+    }
+    return response.status(500).json({
+      status : 500,
+      message : "server internal error"
+    });
   }
 
 
-  // 로그인, 성공 시 jwt 토큰 발급
+  /**
+   * 로그인, 성공 시 jwt 발급
+   * @param signinUserDto 로그인 정보
+   * @param response 응답 객체
+   * @returns 로그인 성공 유무
+   */
   @Post('signin')
   @ApiOperation({ summary: `signin User API`, description: `Sign in` })
   @ApiCreatedResponse({ description: `Sign in`, type: SigninUserDto })
@@ -40,10 +58,13 @@ export class UserController {
       response.setHeader("Authorization", access_token);
       return response.status(201).json({
         status: 201,
-        message: 'Login'
+        message: 'Logined'
       });
     }
-    return null;
+    return response.status(404).json({
+      status : 404,
+      message : "Not Found"
+    });
   }
 
   // 2022-08-25 1640 코드 보존
@@ -67,7 +88,12 @@ export class UserController {
   // }
 
 
-  // 회원 정보 수정
+  /**
+   * 회원 정보 수정
+   * @param request 유저 jwt
+   * @param updateUserDto 수정할 회원 정보
+   * @returns 회원 정보 수정 성공 유무
+   */
   @Put()
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: `update User API`, description: `update User` })
@@ -88,14 +114,29 @@ export class UserController {
     const user_nickname = this.authService.getUserNickname(request);
   }
 
-  // 회원 탈퇴 (유저 삭제)
+  /**
+   * 회원 탈퇴 (유저 삭제)
+   * @param request 유저 jwt
+   * @param response 응답 객체
+   * @returns 탈퇴 유무
+   */
   @Delete()
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: `delete User API`, description: `delete` })
   @ApiCreatedResponse({ description: `delete` })
-  deleteUser(@Req() request: Request) {
+  deleteUser(@Req() request: Request, @Res() response : Response) {
     console.log("User API deleteUser");
     const user_nickname = this.authService.getUserNickname(request);
-    return this.userService.deleteUser(user_nickname);
+    const isDelete = this.userService.deleteUser(user_nickname);
+    if(isDelete){
+      return response.status(200).json({
+        status : 200,
+        message : "user Deleted"
+      });
+    }
+    return response.status(401).json({
+      status : 401,
+      message : "unauthorized"
+    });
   }
 }
