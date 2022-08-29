@@ -46,7 +46,14 @@ export class UserService {
   //   return result;
   // }
 
-  
+  responseToken(accessToken : string, refreshToken : string) : Object{
+    const responseInfomation = {
+      accessToken : accessToken,
+      refreshToken : refreshToken,
+      message : "Login"
+    };
+    return responseInfomation;
+  }
 
 
   /**
@@ -55,9 +62,9 @@ export class UserService {
    * @param user_nickname 유저 닉네임 (식별자)
    * @returns 성공 유무
    */
-  async updateUser(updateUserDto : UpdateUserDto, user_nickname : string) : Promise<boolean>{
-    const {user_name, user_phone_number} = updateUserDto;
-    const result = await this.userRepository.updateUser([user_name, user_nickname, user_phone_number]);
+  async updateUser(updateUserDto : UpdateUserDto, user_nickname_id : string) : Promise<boolean>{
+    const {user_name, user_nickname, user_phone_number} = updateUserDto;
+    const result = await this.userRepository.updateUser([user_name, user_nickname, user_phone_number, user_nickname_id]);
     const {affectedRows} = result;
     return common.isSuccess(affectedRows);
   }

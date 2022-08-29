@@ -90,7 +90,7 @@ export class UserRepository extends Repository<User>{
           user_nickname = ?,
           user_phone_number = ?
         WHERE
-          user_id = ?
+          user_nickname = ?
       `;
       const [result] = await mysqlConnection.query(query, userInfo);
       mysqlConnection.release();

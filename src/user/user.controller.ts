@@ -50,21 +50,23 @@ export class UserController {
   @Post('signin')
   @ApiOperation({ summary: `signin User API`, description: `Sign in` })
   @ApiCreatedResponse({ description: `Sign in`, type: SigninUserDto })
-  async signin(@Body() signinUserDto: SigninUserDto, @Res() response: Response) {
+  async signin(@Body() signinUserDto: SigninUserDto) {
     console.log("User API signin");
     const user_nickname = await this.userService.findNickname(signinUserDto);
     if (user_nickname) {
-      const access_token = this.authService.sign(user_nickname);
-      response.setHeader("Authorization", access_token);
-      return response.status(201).json({
-        status: 201,
-        message: 'Logined'
-      });
+      const accessToken = this.authService.sign(user_nickname);
+      const refreshToken = this.authService.refresh();
+      return {
+        accessToken : accessToken,
+        refreshToken : refreshToken,
+        message : "Login",
+        status : 201
+      };
     }
-    return response.status(404).json({
+    return {
       status : 404,
       message : "Not Found"
-    });
+    };
   }
 
   // 2022-08-25 1640 코드 보존
@@ -98,10 +100,20 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: `update User API`, description: `update User` })
   @ApiCreatedResponse({ description: `Update User`, type: null })
-  updateUser(@Req() request: Request, @Body() updateUserDto: UpdateUserDto) {
+  updateUser(@Req() request: Request, @Body() updateUserDto: UpdateUserDto, @Res() response : Response) {
     console.log("User API updateUser");
     const user_nickname = this.authService.getUserNickname(request);
-    return this.userService.updateUser(updateUserDto, user_nickname);
+    const isUpdated = this.userService.updateUser(updateUserDto, user_nickname);
+    if(isUpdated){
+      return response.status(201).json({
+        status : 201,
+        message : "user updated"
+      });
+    }
+    return response.status(500).json({
+      status : 500,
+      message : "server internal error"
+    });
   }
 
   // 비밀번호 변경

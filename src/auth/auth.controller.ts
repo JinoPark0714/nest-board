@@ -14,7 +14,12 @@ export class AuthController {
   @ApiCreatedResponse({description : `verify`})
   verifyUser(@Req() request : Request){
     console.log("Auth API verify");
-    const { authorization} = request.headers;
-    return this.authService.verify(authorization);
+    const { authorization, refresh} = request.headers;
+    const accessTokenInfomation = this.authService.verifyAccessToken(authorization);
+    const refreshTokenInfomation = this.authService.verifyRefreshToken(refresh);
+    return {
+      access : accessTokenInfomation,
+      refresh : refreshTokenInfomation
+    };
   }
 }
