@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException, BadRequestException } from '@nestjs/common';
 import { UserRepository } from './user.repository';
 import { SigninUserDto } from './dto/signin-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -12,28 +12,32 @@ export class UserService {
   ){}
   
   /**
-   * 유저 생성
-   * @param createUserDto 회원가입 정보 
-   * @returns 성공 유무
+   * create user
+   * @param createUserDto user infomation
+   * @returns apply status
    */
   async signup(createUserDto : CreateUserDto) {
-    const {user_id, user_password, user_name, user_nickname, user_phone_number} = createUserDto;
-    const result = await this.userRepository.signup({user_id, user_password, user_name, user_nickname, user_phone_number});
-    const {affectedRows} = result;
-    return common.isSuccess(affectedRows);
+    try {
+      const {user_id, user_password, user_name, user_nickname, user_phone_number} = createUserDto;
+      return await this.userRepository.signup({user_id, user_password, user_name, user_nickname, user_phone_number});
+    } catch (error) {
+      throw new BadRequestException("이미 정보가 존재합니다.");
+    }
   }
 
   /**
-   * 닉네임 찾기
-   * @param signinUserDto 로그인 정보 
-   * @returns 닉네임(문자열)
+   * find nickname
+   * @param signinUserDto signin infomation 
+   * @returns nickname (string)
    */
   async findNickname(signinUserDto : SigninUserDto) : Promise<any>{
-    const {user_id, user_password} = signinUserDto;
-    const {user_nickname} = await this.userRepository.findNickname(user_id, user_password); 
-    if(!user_nickname)
+    try {
+      const {user_id, user_password} = signinUserDto;
+      const {user_nickname} = await this.userRepository.findNickname(user_id, user_password); 
+      return user_nickname;      
+    } catch (error) {
       throw new NotFoundException("아이디와 비밀번호를 다시 입력해주세요.");
-    return user_nickname;
+    }
   }
 
   // 2022-08-25 1640 코드 보존

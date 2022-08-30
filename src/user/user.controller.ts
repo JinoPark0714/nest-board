@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Delete, UseGuards, Put, Patch, Req, Res } from '@nestjs/common';
+import { Controller, Post, Body, Delete, UseGuards, Put, Patch, Req, Res, HttpCode } from '@nestjs/common';
 import { UserService } from './user.service';
 import { ApiTags, ApiOperation, ApiCreatedResponse } from '@nestjs/swagger';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -23,21 +23,17 @@ export class UserController {
    * @returns 회원 가입 성공 유무
    */
   @Post()
+  @HttpCode(201)
   @ApiOperation({ summary: `signup User API`, description: `Create User` })
   @ApiCreatedResponse({ description: `Create User`, type: CreateUserDto })
-  signup(@Body() createUserDto: CreateUserDto, @Res() response : Response) {
+  async signup(@Body() createUserDto: CreateUserDto) {
     console.log("User API signup");
-    const isCreated = this.userService.signup(createUserDto);
-    if(isCreated){
-      return response.status(201).json({
-        status : 201,
-        message : "user created"
-      });
-    }
-    return response.status(500).json({
-      status : 500,
-      message : "server internal error"
-    });
+    const isCreated = await this.userService.signup(createUserDto);
+    console.log(isCreated);
+    return {
+      statusCode : 201,
+      message : "user created"
+    };
   }
 
 
@@ -48,46 +44,20 @@ export class UserController {
    * @returns 로그인 성공 유무
    */
   @Post('signin')
+  @HttpCode(201)
   @ApiOperation({ summary: `signin User API`, description: `Sign in` })
   @ApiCreatedResponse({ description: `Sign in`, type: SigninUserDto })
   async signin(@Body() signinUserDto: SigninUserDto) {
     console.log("User API signin");
-    const user_nickname = await this.userService.findNickname(signinUserDto);
-    if (user_nickname) {
-      const accessToken = this.authService.sign(user_nickname);
-      const refreshToken = this.authService.refresh();
-      return {
-        accessToken : accessToken,
-        refreshToken : refreshToken,
-        message : "Login",
-        status : 201
-      };
-    }
+    const userNickname = await this.userService.findNickname(signinUserDto);
+    const accessToken = this.authService.sign(userNickname);
+    const refreshToken = this.authService.refresh();
     return {
-      status : 404,
-      message : "Not Found"
+      accessToken: accessToken,
+      refreshToken: refreshToken,
+      message: "Login",
     };
   }
-
-  // 2022-08-25 1640 코드 보존
-  // 로그인, 성공 시 jwt 토큰 발급
-  // @Post('signin')
-  // @UseGuards(LocalAuthGuard)
-  // @ApiOperation({ summary: `signin User API`, description: `Sign in` })
-  // @ApiCreatedResponse({ description: `Sign in`, type: SigninUserDto })
-  // async signin(@Body() signinUserDto: SigninUserDto, @Res() response: Response) {
-  //   console.log("User API signin");
-  //   const userNickname = await this.userService.findNickname(signinUserDto);
-  //   if (userNickname) {
-  //     const access_token = this.authService.sign(signinUserDto);
-  //     response.setHeader("Authorization", access_token);
-  //     return response.status(201).json({
-  //       status: 201,
-  //       message: 'Login'
-  //     });
-  //   }
-  //   return null;
-  // }
 
 
   /**
@@ -97,34 +67,26 @@ export class UserController {
    * @returns 회원 정보 수정 성공 유무
    */
   @Put()
+  @HttpCode(200)
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: `update User API`, description: `update User` })
   @ApiCreatedResponse({ description: `Update User`, type: null })
-  updateUser(@Req() request: Request, @Body() updateUserDto: UpdateUserDto, @Res() response : Response) {
+  updateUser(@Req() request: Request, @Body() updateUserDto: UpdateUserDto, @Res() response: Response) {
     console.log("User API updateUser");
     const user_nickname = this.authService.getUserNickname(request);
     const isUpdated = this.userService.updateUser(updateUserDto, user_nickname);
-    if(isUpdated){
+    if (isUpdated) {
       return response.status(201).json({
-        status : 201,
-        message : "user updated"
+        status: 201,
+        message: "user updated"
       });
     }
     return response.status(500).json({
-      status : 500,
-      message : "server internal error"
+      status: 500,
+      message: "server internal error"
     });
   }
 
-  // 비밀번호 변경
-  @Patch()
-  @UseGuards(JwtAuthGuard)
-  @ApiOperation({ summary: `Update password User API`, description: `Update password` })
-  @ApiCreatedResponse({ description: `Update password` })
-  updatePassword(@Req() request: Request) {
-    console.log("User API updatePassword");
-    const user_nickname = this.authService.getUserNickname(request);
-  }
 
   /**
    * 회원 탈퇴 (유저 삭제)
@@ -136,19 +98,19 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: `delete User API`, description: `delete` })
   @ApiCreatedResponse({ description: `delete` })
-  deleteUser(@Req() request: Request, @Res() response : Response) {
+  deleteUser(@Req() request: Request, @Res() response: Response) {
     console.log("User API deleteUser");
     const user_nickname = this.authService.getUserNickname(request);
     const isDelete = this.userService.deleteUser(user_nickname);
-    if(isDelete){
+    if (isDelete) {
       return response.status(200).json({
-        status : 200,
-        message : "user Deleted"
+        status: 200,
+        message: "user Deleted"
       });
     }
     return response.status(401).json({
-      status : 401,
-      message : "unauthorized"
+      status: 401,
+      message: "unauthorized"
     });
   }
 }

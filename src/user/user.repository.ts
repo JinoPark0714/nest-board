@@ -7,61 +7,25 @@ import mysql from '../util/dbconfig';
 export class UserRepository extends Repository<User>{
 
   /**
-   * 유저 생성
-   * @param userInfo 회원 가입 정보
-   * @returns 데이터베이스 반영 유무
+   * create user
+   * @param user user infomation
+   * @return apply status
    */
-  async signup(userInfo: any): Promise<any> {
-    try {
-      const mysqlConnection = await mysql.getConnection();
-      const query = `
-        INSERT INTO t_user(
-          user_id,
-          user_password,
-          user_name,
-          user_nickname,
-          user_phone_number
-        )VALUES(
-          ?, ?, ?, ?, ?
-        );
-      `;
-      const [result] = await mysqlConnection.query(query, [
-        userInfo.user_id,
-        userInfo.user_password,
-        userInfo.user_name,
-        userInfo.user_nickname,
-        userInfo.user_phone_number
-      ]);
-      mysqlConnection.release();
-      return result;
-    } catch (error) {
-      const { message, code, errno } = error;
-      return { message, code, errno };
-    }
-  }
-
-  /**
-   * 로그인
-   * @param user_id 아이디
-   * @param user_password 패스워드
-   * @returns 유저 정보
-   */
-  async signinORM(user_id: string, user_password: string): Promise<any> {
-    const [result] = await getConnection().createQueryBuilder()
-      .subQuery()
-      .select(['user_name, user_nickname, user_phone_number'])
-      .from(User, 't_user')
-      .where('user_id = :user_id', { user_id: user_id })
-      .andWhere('user_password = :user_password', { user_password: user_password })
+  async signup(user: User): Promise<any> {
+    const result = await getConnection().createQueryBuilder()
+      .insert()
+      .into(User)
+      .values(user)
       .execute();
     return result;
   }
 
+
   /**
-   * 로그인
-   * @param user_id 아이디
-   * @param user_password 패스워드
-   * @returns 닉네임
+   * find nickname
+   * @param user_id user id
+   * @param user_password user password
+   * @returns nickname (string)
    */
   async findNickname(user_id : string, user_password : string) : Promise<any> {
     const [result] = await getConnection().createQueryBuilder()
