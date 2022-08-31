@@ -11,11 +11,17 @@ export class UserRepository extends Repository<User>{
    * @param user user infomation
    * @return apply status
    */
-  async signup(user: User): Promise<any> {
+  async signup(userId : string, userPassword : string, userName : string, userNickname : string, userPhoneNumber : string): Promise<any> {
     const result = await getConnection().createQueryBuilder()
       .insert()
       .into(User)
-      .values(user)
+      .values({
+        user_id : userId,
+        user_password : userPassword,
+        user_name : userName,
+        user_nickname : userNickname,
+        user_phone_number : userPhoneNumber
+      })
       .execute();
     return result;
   }
@@ -23,70 +29,54 @@ export class UserRepository extends Repository<User>{
 
   /**
    * find nickname
-   * @param user_id user id
-   * @param user_password user password
+   * @param userId user id
+   * @param userPassword user password
    * @returns nickname (string)
    */
-  async findNickname(user_id : string, user_password : string) : Promise<any> {
+  async findNickname(userId : string, userPassword : string) : Promise<any> {
     const [result] = await getConnection().createQueryBuilder()
       .subQuery()
       .select(['user_nickname'])
       .from(User, 't_user')
-      .where('user_id = :user_id', {user_id : user_id})
-      .andWhere('user_password = :user_password', {user_password : user_password})
+      .where('user_id = :user_id', {user_id : userId})
+      .andWhere('user_password = :user_password', {user_password : userPassword})
       .execute();
     return result;
   }
 
 
   /**
-   * 회원 정보 수정
-   * @param userInfo 수정할 회원 정보 
-   * @returns 데이터베이스 반영 유무
+   * update user
+   * @param userName : user name
+   * @param userPhoneNumber : user phone number
+   * @param userNickname : user nickname
+   * @returns
    */
-  async updateUser(userInfo: Array<any>) :Promise<any> {
-    try {
-      const mysqlConnection = await mysql.getConnection();
-      const query = `
-        UPDATE t_user
-        SET 
-          user_name = ?,
-          user_nickname = ?,
-          user_phone_number = ?
-        WHERE
-          user_nickname = ?
-      `;
-      const [result] = await mysqlConnection.query(query, userInfo);
-      mysqlConnection.release();
-      return result;
-    } catch (error) {
-      const { message, code, errno } = error;
-      console.log(message, code, errno);
-      return { message, code, errno };
-    }
+  async updateUser(
+    userName: string,
+    userPhoneNumber : string,
+    userNickname : string) :Promise<any> {
+    const result = await getConnection().createQueryBuilder()
+    .update(User)
+    .set({
+      user_name : userName,
+      user_phone_number : userPhoneNumber
+    })
+    .where('user_nickname = :user_nickname', {user_nickname : userNickname})
+    .execute();
+    return result;
   }
 
   /**
-   * 유저 삭제
-   * @param user_nickname 닉네임 
-   * @returns 데이터베이스 반영 유무
+   * delete user
+   * @param userNickname user nickname
    */
-  async deleteUser(user_nickname: string): Promise<any> {
-    try {
-      const mysqlConnection = await mysql.getConnection();
-      const query = `
-        DELETE
-        FROM t_user
-        WHERE user_nickname = ?
-      `;
-      const [result] = await mysqlConnection.query(query, [user_nickname]);
-      mysqlConnection.release();
-      return result;
-    } catch (error) {
-      const { message, code, errno } = error;
-      return { message, code, errno };
-    }
+  async deleteUser(userNickname : string) : Promise<any> {
+    const result = await getConnection().createQueryBuilder()
+    .delete()
+    .from(User)
+    .where('user_nickname = :user_nickname', {user_nickname : userNickname})
+    .execute();
+    return result;
   }
-
-
-}
+} 

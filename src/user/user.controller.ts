@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Delete, UseGuards, Put, Patch, Req, Res, HttpCode } from '@nestjs/common';
+import { Controller, Post, Body, Delete, UseGuards, Put, HttpCode, Headers } from '@nestjs/common';
 import { UserService } from './user.service';
 import { ApiTags, ApiOperation, ApiCreatedResponse } from '@nestjs/swagger';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -6,7 +6,6 @@ import { SigninUserDto } from './dto/signin-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthService } from '../auth/auth.service';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
-import { Request, Response } from 'express';
 
 @Controller('user')
 @ApiTags('User API')
@@ -17,31 +16,24 @@ export class UserController {
   ) { }
 
   /**
-   * 회원 가입 (유저 생성)
-   * @param createUserDto 회원 생성 정보
-   * @param response 응답 객체
-   * @returns 회원 가입 성공 유무
+   * create user
+   * @param createUserDto
+   * @returns 
    */
   @Post()
   @HttpCode(201)
   @ApiOperation({ summary: `signup User API`, description: `Create User` })
   @ApiCreatedResponse({ description: `Create User`, type: CreateUserDto })
-  async signup(@Body() createUserDto: CreateUserDto) {
+  signup(@Body() createUserDto: CreateUserDto) {
     console.log("User API signup");
-    const isCreated = await this.userService.signup(createUserDto);
-    console.log(isCreated);
-    return {
-      statusCode : 201,
-      message : "user created"
-    };
+    return this.userService.signup(createUserDto);
   }
 
 
   /**
-   * 로그인, 성공 시 jwt 발급
-   * @param signinUserDto 로그인 정보
-   * @param response 응답 객체
-   * @returns 로그인 성공 유무
+   * sign in
+   * @param signinUserDto
+   * @returns 
    */
   @Post('signin')
   @HttpCode(201)
@@ -61,56 +53,40 @@ export class UserController {
 
 
   /**
-   * 회원 정보 수정
-   * @param request 유저 jwt
-   * @param updateUserDto 수정할 회원 정보
-   * @returns 회원 정보 수정 성공 유무
+   * Update User
+   * @param updateUserDto
+   * @param authorization access token
+   * @param refresh refresh token
+   * @returns
    */
   @Put()
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: `update User API`, description: `update User` })
   @ApiCreatedResponse({ description: `Update User`, type: null })
-  updateUser(@Req() request: Request, @Body() updateUserDto: UpdateUserDto, @Res() response: Response) {
+  updateUser(
+    @Body() updateUserDto: UpdateUserDto, 
+    @Headers("Authorization") authorization : string, 
+    @Headers("Refresh") refresh : string) {
     console.log("User API updateUser");
-    const user_nickname = this.authService.getUserNickname(request);
-    const isUpdated = this.userService.updateUser(updateUserDto, user_nickname);
-    if (isUpdated) {
-      return response.status(201).json({
-        status: 201,
-        message: "user updated"
-      });
-    }
-    return response.status(500).json({
-      status: 500,
-      message: "server internal error"
-    });
+    const userNickname = this.authService.getUserNickname(authorization);
+    return this.userService.updateUser(updateUserDto, userNickname);
   }
 
 
   /**
-   * 회원 탈퇴 (유저 삭제)
-   * @param request 유저 jwt
-   * @param response 응답 객체
-   * @returns 탈퇴 유무
+   * delete user
+   * @param authorization access token
+   * @returns
    */
   @Delete()
+  @HttpCode(200)
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: `delete User API`, description: `delete` })
   @ApiCreatedResponse({ description: `delete` })
-  deleteUser(@Req() request: Request, @Res() response: Response) {
+  deleteUser(@Headers("Authorization") authorization : string) {
     console.log("User API deleteUser");
-    const user_nickname = this.authService.getUserNickname(request);
-    const isDelete = this.userService.deleteUser(user_nickname);
-    if (isDelete) {
-      return response.status(200).json({
-        status: 200,
-        message: "user Deleted"
-      });
-    }
-    return response.status(401).json({
-      status: 401,
-      message: "unauthorized"
-    });
+    const userNickname = this.authService.getUserNickname(authorization);
+    return this.userService.deleteUser(userNickname);
   }
 }

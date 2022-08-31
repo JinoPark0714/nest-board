@@ -1,9 +1,8 @@
-import { Injectable, InternalServerErrorException, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException, BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { UserRepository } from './user.repository';
 import { SigninUserDto } from './dto/signin-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
-import { common } from '../util/common';
 
 @Injectable()
 export class UserService {
@@ -16,10 +15,10 @@ export class UserService {
    * @param createUserDto user infomation
    * @returns apply status
    */
-  async signup(createUserDto : CreateUserDto) {
+  async signup(createUserDto : CreateUserDto) : Promise<any>{
     try {
-      const {user_id, user_password, user_name, user_nickname, user_phone_number} = createUserDto;
-      return await this.userRepository.signup({user_id, user_password, user_name, user_nickname, user_phone_number});
+      const {userId, userPassword, userName, userNickname, userPhoneNumber} = createUserDto;
+      return await this.userRepository.signup(userId, userPassword, userName, userNickname, userPhoneNumber);
     } catch (error) {
       throw new BadRequestException("이미 정보가 존재합니다.");
     }
@@ -32,56 +31,42 @@ export class UserService {
    */
   async findNickname(signinUserDto : SigninUserDto) : Promise<any>{
     try {
-      const {user_id, user_password} = signinUserDto;
-      const {user_nickname} = await this.userRepository.findNickname(user_id, user_password); 
+      const {userId, userPassword} = signinUserDto;
+      const {user_nickname} = await this.userRepository.findNickname(userId, userPassword); 
       return user_nickname;      
     } catch (error) {
       throw new NotFoundException("아이디와 비밀번호를 다시 입력해주세요.");
     }
   }
 
-  // 2022-08-25 1640 코드 보존
-  // 아이디와 비밀번호를 통해 로그인 여부 반환.
-  // async signin(signinUserDto : SigninUserDto) : Promise<any>{
-  //   const {user_id, user_password} = signinUserDto;
-  //   const result = await this.userRepository.signinORM(user_id, user_password); 
-  //   if(!result)
-  //     throw new NotFoundException("아이디와 비밀번호를 다시 입력해주세요.");
-  //   return result;
-  // }
-
-  responseToken(accessToken : string, refreshToken : string) : Object{
-    const responseInfomation = {
-      accessToken : accessToken,
-      refreshToken : refreshToken,
-      message : "Login"
-    };
-    return responseInfomation;
-  }
-
-
   /**
-   * 회원 정보 수정
-   * @param updateUserDto 수정할 회원 정보
-   * @param user_nickname 유저 닉네임 (식별자)
-   * @returns 성공 유무
+   * update user
+   * @param updateUserDto 
+   * @param userNickname user nickname
+   * @returns update status
    */
-  async updateUser(updateUserDto : UpdateUserDto, user_nickname_id : string) : Promise<boolean>{
-    const {user_name, user_nickname, user_phone_number} = updateUserDto;
-    const result = await this.userRepository.updateUser([user_name, user_nickname, user_phone_number, user_nickname_id]);
-    const {affectedRows} = result;
-    return common.isSuccess(affectedRows);
+  async updateUser(updateUserDto : UpdateUserDto, userNickname : string) : Promise<any>{
+    try {
+      const {userName, userPhoneNumber} = updateUserDto;
+      const result = await this.userRepository.updateUser(userName, userPhoneNumber, userNickname);
+      return result;
+    } catch (error) {
+      throw new UnauthorizedException(); 
+    }
   }
 
   /**
-   * 회원 탈퇴
-   * @param user_nickname 유저 닉네임 (식별자)
-   * @returns 성공 유무
+   * delete user
+   * @param userNickname user nickname
+   * @returns delete status
    */
-  async deleteUser(user_nickname : string) : Promise<boolean>{
-    const result = await this.userRepository.deleteUser(user_nickname);
-    const {affectedRows} = result;
-    return common.isSuccess(affectedRows);
+  async deleteUser(userNickname : string) : Promise<boolean>{
+    try {
+      const result = await this.userRepository.deleteUser(userNickname);
+      return result;      
+    } catch (error) {
+      throw new UnauthorizedException();
+    }
   }
 
 }

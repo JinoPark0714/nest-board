@@ -74,8 +74,7 @@ export class AuthService {
   }
 
   // jwt를 이용하여 user_id 추출하기
-  getUserNickname(request: Request): string {
-    const { authorization } = request.headers;
+  getUserNickname(authorization: string): string {
     const { user_nickname } = this.verifyAccessToken(authorization);
     return user_nickname;
   }
