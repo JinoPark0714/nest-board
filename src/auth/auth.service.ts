@@ -2,21 +2,23 @@ import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { SigninUserDto } from '../user/dto/signin-user.dto';
 import { Request } from 'express';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly jwtService: JwtService
+    private readonly jwtService: JwtService,
+    private readonly configService : ConfigService
   ) { }
 
   /**
    * sign access token
-   * @param user_nickname user nickname
+   * @param uuid uuid
    * @returns token type of string
    */
-  sign(user_nickname: string): string {
+  sign(uuid: string): string {
     const payload = {
-      user_nickname: user_nickname
+      uuid: uuid
     }
     return this.jwtService.sign(payload);
   }
@@ -47,8 +49,8 @@ export class AuthService {
    */
   refresh() : string{
     const signOptions = {
-      secret : process.env.SECRET_KEY,
-      expiresIn : process.env.REFRESH_TOKEN_EXPIRES_IN
+      secret : this.configService.get('SECRET_KEY'),
+      expiresIn : this.configService.get('REFRESH_TOKEN_EXPIRES_IN')
     };
     return this.jwtService.sign({}, signOptions);
   }
@@ -74,9 +76,9 @@ export class AuthService {
   }
 
   // jwt를 이용하여 user_id 추출하기
-  getUserNickname(authorization: string): string {
-    const { user_nickname } = this.verifyAccessToken(authorization);
-    return user_nickname;
+  getUuid(authorization: string): string {
+    const { uuid } = this.verifyAccessToken(authorization);
+    return uuid;
   }
 
 }

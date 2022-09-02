@@ -20,7 +20,7 @@ export class BoardController {
   @ApiOperation({ summary: `post Board API`, description: `Post Board` })
   createPost(@Req() request: Request, @Body() createBoardDto: CreateBoardDto) {
     const {authorization} = request.headers;
-    const {user_id} = this.authService.verify(authorization);
+    const {user_id} = this.authService.verifyAccessToken(authorization);
     return this.boardService.createPost(createBoardDto, user_id);
   }
 
@@ -29,7 +29,7 @@ export class BoardController {
   @ApiOperation({ summary: ``, description: `` })
   updatePost(@Req() request: Request, @Body() updateBoardDto: UpdateBoardDto) {
     const {authorization} = request.headers;
-    const {user_id} = this.authService.verify(authorization);
+    const {user_id} = this.authService.verifyAccessToken(authorization);
     return this.boardService.updatePost(updateBoardDto, user_id);
   }
 

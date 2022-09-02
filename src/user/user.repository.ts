@@ -11,7 +11,7 @@ export class UserRepository extends Repository<User>{
    * @param user user infomation
    * @return apply status
    */
-  async signup(userId : string, userPassword : string, userName : string, userNickname : string, userPhoneNumber : string): Promise<any> {
+  async signup(userId : string, userPassword : string, userName : string, userNickname : string, userPhoneNumber : string, uuid : string): Promise<any> {
     const result = await getConnection().createQueryBuilder()
       .insert()
       .into(User)
@@ -20,7 +20,8 @@ export class UserRepository extends Repository<User>{
         user_password : userPassword,
         user_name : userName,
         user_nickname : userNickname,
-        user_phone_number : userPhoneNumber
+        user_phone_number : userPhoneNumber,
+        uuid : uuid
       })
       .execute();
     return result;
@@ -31,12 +32,12 @@ export class UserRepository extends Repository<User>{
    * find nickname
    * @param userId user id
    * @param userPassword user password
-   * @returns nickname (string)
+   * @returns uuid
    */
-  async findNickname(userId : string, userPassword : string) : Promise<any> {
+  async findUuid(userId : string, userPassword : string) : Promise<any> {
     const [result] = await getConnection().createQueryBuilder()
       .subQuery()
-      .select(['user_nickname'])
+      .select(['uuid'])
       .from(User, 't_user')
       .where('user_id = :user_id', {user_id : userId})
       .andWhere('user_password = :user_password', {user_password : userPassword})

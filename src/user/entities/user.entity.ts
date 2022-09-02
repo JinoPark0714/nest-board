@@ -16,4 +16,7 @@ export class User {
 
   @Column()
   user_phone_number : string;
+
+  @Column()
+  uuid : string;
 }

@@ -3,6 +3,7 @@ import { UserRepository } from './user.repository';
 import { SigninUserDto } from './dto/signin-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
+import { v4 as uuid } from 'uuid';
 
 @Injectable()
 export class UserService {
@@ -18,8 +19,9 @@ export class UserService {
   async signup(createUserDto : CreateUserDto) : Promise<any>{
     try {
       const {userId, userPassword, userName, userNickname, userPhoneNumber} = createUserDto;
-      return await this.userRepository.signup(userId, userPassword, userName, userNickname, userPhoneNumber);
+      return await this.userRepository.signup(userId, userPassword, userName, userNickname, userPhoneNumber, uuid());
     } catch (error) {
+      console.log(error);
       throw new BadRequestException("이미 정보가 존재합니다.");
     }
   }
@@ -29,12 +31,13 @@ export class UserService {
    * @param signinUserDto signin infomation 
    * @returns nickname (string)
    */
-  async findNickname(signinUserDto : SigninUserDto) : Promise<any>{
+  async findUuid(signinUserDto : SigninUserDto) : Promise<any>{
     try {
       const {userId, userPassword} = signinUserDto;
-      const {user_nickname} = await this.userRepository.findNickname(userId, userPassword); 
-      return user_nickname;      
+      const {uuid} = await this.userRepository.findUuid(userId, userPassword); 
+      return uuid;      
     } catch (error) {
+      console.log(error);
       throw new NotFoundException("아이디와 비밀번호를 다시 입력해주세요.");
     }
   }

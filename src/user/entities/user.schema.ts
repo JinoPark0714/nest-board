@@ -20,6 +20,9 @@ export const UserSchema = new EntitySchema<User>({
     },
     user_phone_number: {
       type: String
+    },
+    uuid : {
+      type : String
     }
   }
 });

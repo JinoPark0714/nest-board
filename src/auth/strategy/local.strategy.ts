@@ -7,14 +7,14 @@ import { AuthService } from '../auth.service';
 export class LocalStrategy extends PassportStrategy(Strategy) {
   constructor(private authService: AuthService) {
     super({
-      usernameField : 'user_nickname'
+      usernameField : 'uuid'
     });
   }
 
   // passport-local 인증
-  validate(user_nickname : string): string {
+  validate(uuid : string): string {
     console.log("Local Strategy");
-    const token = this.authService.sign(user_nickname);
+    const token = this.authService.sign(uuid);
     if (!token) {
       throw new UnauthorizedException();
     }

@@ -41,8 +41,8 @@ export class UserController {
   @ApiCreatedResponse({ description: `Sign in`, type: SigninUserDto })
   async signin(@Body() signinUserDto: SigninUserDto) {
     console.log("User API signin");
-    const userNickname = await this.userService.findNickname(signinUserDto);
-    const accessToken = this.authService.sign(userNickname);
+    const uuid = await this.userService.findUuid(signinUserDto);
+    const accessToken = this.authService.sign(uuid);
     const refreshToken = this.authService.refresh();
     return {
       accessToken: accessToken,
@@ -69,8 +69,8 @@ export class UserController {
     @Headers("Authorization") authorization : string, 
     @Headers("Refresh") refresh : string) {
     console.log("User API updateUser");
-    const userNickname = this.authService.getUserNickname(authorization);
-    return this.userService.updateUser(updateUserDto, userNickname);
+    const uuid = this.authService.getUuid(authorization);
+    return this.userService.updateUser(updateUserDto, uuid);
   }
 
 
@@ -86,7 +86,7 @@ export class UserController {
   @ApiCreatedResponse({ description: `delete` })
   deleteUser(@Headers("Authorization") authorization : string) {
     console.log("User API deleteUser");
-    const userNickname = this.authService.getUserNickname(authorization);
-    return this.userService.deleteUser(userNickname);
+    const uuid = this.authService.getUuid(authorization);
+    return this.userService.deleteUser(uuid);
   }
 }
