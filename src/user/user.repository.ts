@@ -50,33 +50,35 @@ export class UserRepository extends Repository<User>{
    * update user
    * @param userName : user name
    * @param userPhoneNumber : user phone number
-   * @param userNickname : user nickname
+   * @param uuid : uuid
    * @returns
    */
   async updateUser(
     userName: string,
+    userNickname : string,
     userPhoneNumber : string,
-    userNickname : string) :Promise<any> {
+    uuid : string) :Promise<any> {
     const result = await getConnection().createQueryBuilder()
     .update(User)
     .set({
       user_name : userName,
+      user_nickname : userNickname,
       user_phone_number : userPhoneNumber
     })
-    .where('user_nickname = :user_nickname', {user_nickname : userNickname})
+    .where('uuid = :uuid', {uuid : uuid})
     .execute();
     return result;
   }
 
   /**
    * delete user
-   * @param userNickname user nickname
+   * @param uuid
    */
-  async deleteUser(userNickname : string) : Promise<any> {
+  async deleteUser(uuid : string) : Promise<any> {
     const result = await getConnection().createQueryBuilder()
     .delete()
     .from(User)
-    .where('user_nickname = :user_nickname', {user_nickname : userNickname})
+    .where('uuid = :uuid', {uuid : uuid})
     .execute();
     return result;
   }

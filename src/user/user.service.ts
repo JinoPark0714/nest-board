@@ -19,10 +19,23 @@ export class UserService {
   async signup(createUserDto : CreateUserDto) : Promise<any>{
     try {
       const {userId, userPassword, userName, userNickname, userPhoneNumber} = createUserDto;
-      return await this.userRepository.signup(userId, userPassword, userName, userNickname, userPhoneNumber, uuid());
+      const result = await this.userRepository.signup(userId, userPassword, userName, userNickname, userPhoneNumber, uuid());
+      if(result){
+        return {
+          status_code : 201,
+          message : "user created"
+        };
+      }
     } catch (error) {
+      const {code} = error;
       console.log(error);
-      throw new BadRequestException("이미 정보가 존재합니다.");
+      switch(code){
+        case "ER_DUP_ENTRY" : 
+          throw new BadRequestException("ID가 중복됩니다.");          
+        
+        default:
+          throw new BadRequestException("잘못된 요청입니다.");
+      }
     }
   }
 
@@ -45,13 +58,13 @@ export class UserService {
   /**
    * update user
    * @param updateUserDto 
-   * @param userNickname user nickname
+   * @param uuid
    * @returns update status
    */
-  async updateUser(updateUserDto : UpdateUserDto, userNickname : string) : Promise<any>{
+  async updateUser(updateUserDto : UpdateUserDto, uuid : string) : Promise<any>{
     try {
-      const {userName, userPhoneNumber} = updateUserDto;
-      const result = await this.userRepository.updateUser(userName, userPhoneNumber, userNickname);
+      const {userName, userNickname, userPhoneNumber} = updateUserDto;
+      const result = await this.userRepository.updateUser(userName, userNickname, userPhoneNumber, uuid);
       return result;
     } catch (error) {
       throw new UnauthorizedException(); 
@@ -60,13 +73,18 @@ export class UserService {
 
   /**
    * delete user
-   * @param userNickname user nickname
+   * @param uuid 
    * @returns delete status
    */
-  async deleteUser(userNickname : string) : Promise<boolean>{
+  async deleteUser(uuid : string) : Promise<any>{
     try {
-      const result = await this.userRepository.deleteUser(userNickname);
-      return result;      
+      const result = await this.userRepository.deleteUser(uuid);
+      if(result){
+        return {
+          status_code : 201,
+          message : "user deleted"
+        };
+      }
     } catch (error) {
       throw new UnauthorizedException();
     }
