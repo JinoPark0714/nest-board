@@ -21,21 +21,19 @@ export class UserService {
       const {userId, userPassword, userName, userNickname, userPhoneNumber} = createUserDto;
       const result = await this.userRepository.signup(userId, userPassword, userName, userNickname, userPhoneNumber, uuid());
       if(result){
-        return {
-          status_code : 201,
-          message : "user created"
-        };
+        return true;
       }
     } catch (error) {
-      const {code} = error;
-      console.log(error);
-      switch(code){
-        case "ER_DUP_ENTRY" : 
-          throw new BadRequestException("ID가 중복됩니다.");          
+      throw new BadRequestException("잘못된 요청입니다.");
+      // const {code} = error;
+      // console.log(error);
+      // switch(code){
+      //   case "ER_DUP_ENTRY" : 
+      //     throw new BadRequestException("ID가 중복됩니다.");          
         
-        default:
-          throw new BadRequestException("잘못된 요청입니다.");
-      }
+      //   default:
+      //     throw new BadRequestException("잘못된 요청입니다.");
+      // }
     }
   }
 

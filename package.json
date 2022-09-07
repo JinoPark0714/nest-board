@@ -31,6 +31,7 @@
     "@nestjs/platform-express": "^8.0.0",
     "@nestjs/swagger": "^5.0.9",
     "@nestjs/typeorm": "^8.0.2",
+    "class-validator": "^0.13.2",
     "dotenv": "^16.0.1",
     "jsonwebtoken": "^8.5.1",
     "mysql2": "^2.3.3",
@@ -88,6 +89,9 @@
       "**/*.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "moduleNameMapper": {
+      "^src/(.*)$": "<rootDir>/$1"
+    }
   }
 }
