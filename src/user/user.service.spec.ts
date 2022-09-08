@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
+import { SigninUserDto } from './dto/signin-user.dto';
 import { BadRequestException } from '@nestjs/common';
 
 
@@ -64,13 +65,23 @@ describe('UserService', () => {
       expect(result).toEqual(successSignup);
     });
 
-    it('if userId is duplicated, should throw BadRequestException', async () => {
-      userRepository.signup.mockRejectedValue(new BadRequestException("잘못된 요청입니다."));
+    it('if anything is void, should throw BadRequestException', async () => {
+      userRepository.signup.mockRejectedValue(new BadRequestException());
       const result = async () => {
-        await userService.signup(newUser);
+        await userService.signup(voidUser);
       }
-      await expect(result).rejects.toThrow(new BadRequestException("잘못된 요청입니다."));
+      await expect(result).rejects.toThrow(new BadRequestException());
     });
-  })
+  });
+
+  describe("2. signin test", ()=>{
+    const user : SigninUserDto = {
+      userId : 'test',
+      userPassword : 'test'
+    };
+    it('if success signin, should return token', async()=>{
+      userRepository.findUuid.mockRejectedValue(true);
+    });
+  });
 
 });

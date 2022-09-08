@@ -3,6 +3,7 @@ import { UserRepository } from './user.repository';
 import { SigninUserDto } from './dto/signin-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
+import { validateOrReject } from 'class-validator';
 import { v4 as uuid } from 'uuid';
 
 @Injectable()
@@ -24,16 +25,27 @@ export class UserService {
         return true;
       }
     } catch (error) {
-      throw new BadRequestException("잘못된 요청입니다.");
-      // const {code} = error;
-      // console.log(error);
-      // switch(code){
-      //   case "ER_DUP_ENTRY" : 
-      //     throw new BadRequestException("ID가 중복됩니다.");          
+      // throw new BadRequestException("잘못된 요청입니다.");
+      const {code} = error;
+      switch(code){
+        case "ER_DUP_ENTRY" : 
+          throw new BadRequestException("ID is duplicated");          
         
-      //   default:
-      //     throw new BadRequestException("잘못된 요청입니다.");
-      // }
+        default:
+          throw new BadRequestException();
+      }
+    }
+  }
+
+  async checkDuplication  (userId : string) : Promise<any>{
+    try {
+      const result = await this.userRepository.findOne(userId);
+      if(result){
+        return false;
+      }
+      return true;
+    } catch (error) {
+      throw new BadRequestException();
     }
   }
 

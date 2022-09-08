@@ -29,6 +29,13 @@ export class UserController {
     return this.userService.signup(createUserDto);
   }
 
+  @Post('/duplicate')
+  @HttpCode(200)
+  @ApiOperation({summary : `checkDuplicate User API`, description : `check duplicated`})
+  @ApiCreatedResponse({ description : `Check duplicate`})
+  checkDuplication(@Body() userId : string){
+    return this.userService.checkDuplication(userId);
+  }
 
   /**
    * sign in
