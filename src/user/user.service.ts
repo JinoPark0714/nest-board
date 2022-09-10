@@ -1,9 +1,6 @@
-import { Injectable, InternalServerErrorException, NotFoundException, BadRequestException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { UserRepository } from './user.repository';
-import { SigninUserDto } from './dto/signin-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { CreateUserDto } from './dto/create-user.dto';
-import { validateOrReject } from 'class-validator';
+import { CreateUserDto, SigninUserDto, UpdateUserDto, DuplicateUserDto } from './dto';
 import { v4 as uuid } from 'uuid';
 
 @Injectable()
@@ -37,14 +34,21 @@ export class UserService {
     }
   }
 
-  async checkDuplication  (userId : string) : Promise<any>{
+  /**
+   * check user id duplication
+   * @param duplicateUserDto
+   * @returns boolean
+   */
+  async checkDuplication  (duplicateUserDto : DuplicateUserDto) : Promise<any>{
     try {
-      const result = await this.userRepository.findOne(userId);
+      const {userId} = duplicateUserDto;
+      const result = await this.userRepository.findUserId(userId);
       if(result){
         return false;
       }
       return true;
     } catch (error) {
+      console.log(error);
       throw new BadRequestException();
     }
   }

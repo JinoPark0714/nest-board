@@ -1,9 +1,7 @@
 import { Controller, Post, Body, Delete, UseGuards, Put, HttpCode, Headers } from '@nestjs/common';
 import { UserService } from './user.service';
 import { ApiTags, ApiOperation, ApiCreatedResponse } from '@nestjs/swagger';
-import { CreateUserDto } from './dto/create-user.dto';
-import { SigninUserDto } from './dto/signin-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { CreateUserDto, SigninUserDto, UpdateUserDto, DuplicateUserDto } from './dto';
 import { AuthService } from '../auth/auth.service';
 import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
 
@@ -29,12 +27,19 @@ export class UserController {
     return this.userService.signup(createUserDto);
   }
 
-  @Post('/duplicate')
+
+  /**
+   * duplicate user id
+   * @param duplicateUserDto 
+   * @returns 
+   */
+  @Post('/duplication')
   @HttpCode(200)
   @ApiOperation({summary : `checkDuplicate User API`, description : `check duplicated`})
   @ApiCreatedResponse({ description : `Check duplicate`})
-  checkDuplication(@Body() userId : string){
-    return this.userService.checkDuplication(userId);
+  checkDuplication(@Body() duplicateUserDto : DuplicateUserDto){
+    console.log("User API duplication");
+    return this.userService.checkDuplication(duplicateUserDto);
   }
 
   /**

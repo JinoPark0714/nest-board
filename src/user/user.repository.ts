@@ -27,6 +27,21 @@ export class UserRepository extends Repository<User>{
     return result;
   }
 
+  /**
+   * find user id
+   * @param userId 
+   * @returns 
+   */
+  async findUserId(userId : string) : Promise<any> {
+    const [result] = await getConnection().createQueryBuilder()
+    .subQuery()
+    .select(['user_id'])
+    .from(User, 't_user')
+    .where('user_id = :user_id', {user_id : userId})
+    .execute();
+    return result;
+  }
+
 
   /**
    * find nickname
