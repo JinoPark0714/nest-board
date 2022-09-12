@@ -1,6 +1,5 @@
 import { EntityRepository, Repository, getConnection, ReturningStatementNotSupportedError } from "typeorm";
 import { User } from './entities/user.entity';
-import mysql from '../util/dbconfig';
 
 
 @EntityRepository(User)
@@ -11,7 +10,13 @@ export class UserRepository extends Repository<User>{
    * @param user user infomation
    * @return apply status
    */
-  async signup(userId : string, userPassword : string, userName : string, userNickname : string, userPhoneNumber : string, uuid : string): Promise<any> {
+  async signup(
+    userId : string, 
+    userPassword : string, 
+    userName : string, 
+    userNickname : string, 
+    userPhoneNumber : string, 
+    uuid : string) {
     const result = await getConnection().createQueryBuilder()
       .insert()
       .into(User)
@@ -30,9 +35,9 @@ export class UserRepository extends Repository<User>{
   /**
    * find user id
    * @param userId 
-   * @returns 
+   * @returns {string}
    */
-  async findUserId(userId : string) : Promise<any> {
+  async findUserId(userId : string) {
     const [result] = await getConnection().createQueryBuilder()
     .subQuery()
     .select(['user_id'])
@@ -49,7 +54,7 @@ export class UserRepository extends Repository<User>{
    * @param userPassword user password
    * @returns uuid
    */
-  async findUuid(userId : string, userPassword : string) : Promise<any> {
+  async findUuid(userId : string, userPassword : string) {
     const [result] = await getConnection().createQueryBuilder()
       .subQuery()
       .select(['uuid'])
