@@ -22,7 +22,7 @@ export class UserService {
         return true;
     } 
     catch (error) {
-      throw new BadRequestException("잘못된 요청입니다.");
+      throw new BadRequestException();
     }
   }
 
