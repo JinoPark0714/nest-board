@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { SigninUserDto } from '../user/dto/signin-user.dto';
-import { Request } from 'express';
 import { ConfigService } from '@nestjs/config';
+import { UnauthorizedException } from '@nestjs/common';
 
 @Injectable()
 export class AuthService {
@@ -12,6 +11,20 @@ export class AuthService {
   ) { }
 
   /**
+   * verify token
+   * @param authorization access token 
+   * @param refresh refresh token
+   */
+  verifyToken(authorization : string, refresh : string){
+    const accessTokenInfomation = this.verifyAccessToken(authorization);
+    const refreshTokenInfomation = this.verifyRefreshToken(refresh);
+    return {
+      access : accessTokenInfomation,
+      refresh : refreshTokenInfomation
+    };
+  }
+
+  /**
    * sign access token
    * @param uuid uuid
    * @returns token type of string
@@ -19,7 +32,7 @@ export class AuthService {
   sign(uuid: string): string {
     const payload = {
       uuid: uuid
-    }
+    };
     return this.jwtService.sign(payload);
   }
 
@@ -28,17 +41,14 @@ export class AuthService {
    * @param authorization access token
    * @returns access token infomation
    */
-  verifyAccessToken(authorization: string) : any {
+  verifyAccessToken(authorization: string) {
     try {
       const token = authorization.replace('Bearer ', '');
       const userInfo = this.jwtService.verify(token);
       return userInfo;
     } catch (error) {
-      console.log(error);
-      return {
-        status : 401,
-        message : "Unauthorized"
-      };
+      console.log('토큰이 만료됐습니다.');
+      return false;
     }
 
   }
@@ -60,17 +70,13 @@ export class AuthService {
    * @param refreshToken refresh token that type of string 
    * @returns refresh token infomation
    */
-  verifyRefreshToken(refreshToken) : Object{
+  verifyRefreshToken(refreshToken) {
     try {
       const token = refreshToken.replace('Bearer ', '');
       const userInfo = this.jwtService.verify(token);
       return userInfo;
     } catch (error) {
-      console.log(error);
-      return {
-        status : 401,
-        message : "Unauthorized"
-      };
+      return false;
     }
 
   }
@@ -80,5 +86,7 @@ export class AuthService {
     const { uuid } = this.verifyAccessToken(authorization);
     return uuid;
   }
+
+
 
 }

@@ -57,8 +57,8 @@ export class UserController {
     const accessToken = this.authService.sign(uuid);
     const refreshToken = this.authService.refresh();
     return {
-      accessToken: accessToken,
-      refreshToken: refreshToken,
+      access_token: accessToken,
+      refresh_token: refreshToken,
       message: "Login",
     };
   }
@@ -100,5 +100,12 @@ export class UserController {
     console.log("User API deleteUser");
     const uuid = this.authService.getUuid(authorization);
     return this.userService.deleteUser(uuid);
+  }
+
+  @Post('test')
+  @HttpCode(200)
+  test(@Headers('authorization') auth : string, @Headers('refresh') refresh: string){
+    console.log(auth, refresh);
+    return "HiHiHi";
   }
 }
