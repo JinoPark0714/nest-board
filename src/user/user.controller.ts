@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Delete, UseGuards, Put, HttpCode, Headers } from '@nestjs/common';
+import { Controller, Get, Post, Body, Delete, UseGuards, Put, HttpCode, Headers, Param, Query } from '@nestjs/common';
 import { UserService } from './user.service';
 import { ApiTags, ApiOperation, ApiCreatedResponse } from '@nestjs/swagger';
 import { CreateUserDto, SigninUserDto, UpdateUserDto, DuplicateUserDto } from './dto';
@@ -107,5 +107,13 @@ export class UserController {
   test(@Headers('authorization') auth : string, @Headers('refresh') refresh: string){
     console.log(auth, refresh);
     return "HiHiHi";
+  }
+
+  @Get('profile')
+  @HttpCode(200)
+  getProfile(@Query('user_id') userId : any){
+    console.log("User API getProfile");
+    console.log(userId);
+    return this.userService.getProfile(userId);
   }
 }

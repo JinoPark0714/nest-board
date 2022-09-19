@@ -47,7 +47,7 @@ export class AuthService {
       const userInfo = this.jwtService.verify(token);
       return userInfo;
     } catch (error) {
-      console.log('토큰이 만료됐습니다.');
+      console.log('access is expired.');
       return false;
     }
 
@@ -76,6 +76,7 @@ export class AuthService {
       const userInfo = this.jwtService.verify(token);
       return userInfo;
     } catch (error) {
+      console.log('refresh is expired');
       return false;
     }
 

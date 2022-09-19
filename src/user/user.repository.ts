@@ -102,4 +102,14 @@ export class UserRepository extends Repository<User>{
     .execute();
     return result;
   }
+
+  async getProfile(userId : string){
+    const [result] = await getConnection().createQueryBuilder()
+    .subQuery()
+    .select(['user_name, user_nickname, user_phone_number'])
+    .from(User, "t_user")
+    .where('user_id = :user_id', {user_id : userId})
+    .execute();
+    return result;
+  }
 } 

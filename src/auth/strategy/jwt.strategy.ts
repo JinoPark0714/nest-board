@@ -13,8 +13,21 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: any) {
+  async validate(access : any, refresh : any) {
     console.log("Jwt strategy");
-    return { uuid: payload.uuid };
+    const isTrueAccess = this.validateAccess(access);
+    const isTrueRefresh = this.validateRefresh(refresh);
+    if(isTrueAccess && isTrueRefresh)
+      return { uuid: access.uuid };
+  }
+
+  async validateAccess(access : any){
+    console.log("validate access token");
+    return true;
+  }
+
+  async validateRefresh(refresh : any){
+    console.log("validate refresh token");
+    return true;
   }
 }

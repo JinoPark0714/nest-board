@@ -91,6 +91,16 @@ export class UserService {
       throw new UnauthorizedException();
     }
   }
+  
+  async getProfile(userId : string){
+    try {
+      const result = await this.userRepository.getProfile(userId);
+      if(result)
+        return result;
+    } catch (error) {
+      throw new BadRequestException();
+    }
+  }
 
 }
 
