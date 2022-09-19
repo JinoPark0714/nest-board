@@ -47,6 +47,17 @@ export class UserRepository extends Repository<User>{
     return result;
   }
 
+  async findUserIdToUuid(uuid : string){
+    const [result] = await getConnection().createQueryBuilder()
+    .subQuery()
+    .select(['user_id'])
+    .from(User, 't_user')
+    .where('uuid = :uuid', {uuid : uuid})
+    .execute();
+    return result;
+    
+  }
+
 
   /**
    * find nickname

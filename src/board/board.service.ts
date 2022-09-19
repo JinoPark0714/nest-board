@@ -8,9 +8,9 @@ import { common } from '../util/common';
 export class BoardService {
   constructor(private readonly boardRepository : BoardRepository){}
 
-  async createPost(createBoardDto: CreateBoardDto, user_id : string) : Promise<any>{
+  async createPost(createBoardDto: CreateBoardDto, userId : any) : Promise<any>{
     const {board_title, board_text, board_date} = createBoardDto;
-    const result = await this.boardRepository.createPost(user_id, board_title, board_text, board_date);
+    const result = await this.boardRepository.createPost(userId.user_id, board_title, board_text, board_date);
     const {affectedRows} = result;
     return common.isSuccess(affectedRows);;
   }

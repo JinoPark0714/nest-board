@@ -62,6 +62,20 @@ export class UserService {
   }
 
   /**
+   * get user id
+   * @param uuid user uuid 
+   * @returns user id
+   */
+  async getUserId(uuid : string) : Promise<any>{
+    try {
+      const result = await this.userRepository.findUserIdToUuid(uuid);
+      return result;
+    } catch (error) {
+      throw new NotFoundException();
+    }
+  }
+
+  /**
    * update user
    * @param updateUserDto 
    * @param uuid
