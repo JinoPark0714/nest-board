@@ -1,6 +1,5 @@
-import {EntityRepository, Repository} from 'typeorm';
-import mysql from '../util/dbconfig';
-import { Board } from './entities/board.entity';
+import {EntityRepository, Repository, getConnection } from 'typeorm';
+import { Board, boardsAliasName } from './entities/board.entity';
 
 
 @EntityRepository(Board)
@@ -12,54 +11,29 @@ export class BoardRepository extends Repository<Board>{
     boardText : string, 
     boardDate : string
   ) : Promise<any>{
-    try {
-      const queryParams = [userId, boardTitle, boardText, boardDate];
-      const mysqlConnection = await mysql.getConnection();
-      const query = `
-        INSERT INTO t_board(
-          user_id,
-          board_title,
-          board_text,
-          board_date
-        )VALUES(
-          ?, ?, ?, ?
-        )
-      `;
-      const [result] = await mysqlConnection.query(query, queryParams);
-      mysqlConnection.release();
-      return result;
-    } catch (error) {
-      const {message, code, errno} = error;
-      console.log(message, code, errno);
-      return {message, code, errno};
-    }
+    const result = await getConnection().createQueryBuilder()
+      .insert()
+      .into(Board, ['user_id', 'board_title', 'board_text', 'board_date'])
+      .values({
+        user_id : userId,
+        board_title : boardTitle,
+        board_text : boardText,
+        board_date : boardDate
+      })
+      .execute();
+    return result;
   }
 
-  async updatePost(
-    userId : string,
-    boardTitle : string,
-    boardText : string,
-    boardDate : string
-  ) : Promise<any>{
-    try {
-      const queryParams = [boardTitle, boardText, boardDate, userId];
-      const mysqlConnection = await mysql.getConnection();
-      const query = `
-        UPDATE t_board
-        SET 
-          board_title = ?,
-          board_text = ?,
-          board_date = ?
-        WHERE user_id = ?
-      `;
-      const [result] = await mysqlConnection.query(query, queryParams);
-      mysqlConnection.release();
-      return result;
-    } catch (error) {
-      const {message, code, errno} = error;
-      console.log(message, code, errno);
-      return {message, code, errno};
-    }
+
+
+  async getAllPost() : Promise<any> {
+    const [result] = await getConnection().createQueryBuilder()
+    .subQuery()
+    .select(['user_id', 'board_id', 'board_title', 'board_text', 'board_date'])
+    .from(Board, boardsAliasName)
+    .execute();
+    return result;
   }
+
 
 }

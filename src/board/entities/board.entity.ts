@@ -1,8 +1,8 @@
-import {Column, Entity, PrimaryColumn, Unique} from 'typeorm';
+import {Column, Entity, PrimaryColumn, PrimaryGeneratedColumn} from 'typeorm';
 
-@Entity('t_board')
+@Entity('boards')
 export class Board {
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn('increment')
   board_id : number;
 
   @Column()
@@ -17,3 +17,6 @@ export class Board {
   @Column()
   board_date : string;
 }
+
+
+export const boardsAliasName = 'boards';

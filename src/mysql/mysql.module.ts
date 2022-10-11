@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/user/entities/user.entity';
+import { Board } from 'src/board/entities/board.entity';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
@@ -17,9 +18,11 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         port: 3306,
         synchronize: true,
         charset: configService.get('DATABASE_CHARSET'),
-        entities: [User]
+        entities: [User, Board]
       }),
     })
-  ]
+  ],
+  controllers: [],
+  providers: []
 })
 export class MysqlModule { }

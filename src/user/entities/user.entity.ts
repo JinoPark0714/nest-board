@@ -1,6 +1,6 @@
 import {Column, Entity, PrimaryColumn} from 'typeorm';
 
-@Entity('t_user')
+@Entity('users')
 export class User {
   @PrimaryColumn()
   user_id : string;
@@ -20,3 +20,6 @@ export class User {
   @Column()
   uuid : string;
 }
+
+
+export const usersAliasName = 'users';

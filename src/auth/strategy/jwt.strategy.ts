@@ -17,8 +17,25 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     console.log("Jwt strategy");
     const isTrueAccess = this.validateAccess(access);
     const isTrueRefresh = this.validateRefresh(refresh);
+    
+    // 둘 다 유효
     if(isTrueAccess && isTrueRefresh)
       return { uuid: access.uuid };
+    
+      // 둘 다 무효
+    else if(!isTrueAccess && !isTrueRefresh){
+
+    }
+
+    // access 무효
+    else if(!isTrueAccess && isTrueRefresh){
+
+    }
+
+    // refresh 무효
+    else if(isTrueAccess && !isTrueRefresh){
+      return "잘못된 요청입니다.";
+    }
   }
 
   async validateAccess(access : any){

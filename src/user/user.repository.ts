@@ -1,5 +1,5 @@
 import { EntityRepository, Repository, getConnection, ReturningStatementNotSupportedError } from "typeorm";
-import { User } from './entities/user.entity';
+import { User, usersAliasName} from './entities/user.entity';
 
 
 @EntityRepository(User)
@@ -41,7 +41,7 @@ export class UserRepository extends Repository<User>{
     const [result] = await getConnection().createQueryBuilder()
     .subQuery()
     .select(['user_id'])
-    .from(User, 't_user')
+    .from(User, usersAliasName)
     .where('user_id = :user_id', {user_id : userId})
     .execute();
     return result;
@@ -51,7 +51,7 @@ export class UserRepository extends Repository<User>{
     const [result] = await getConnection().createQueryBuilder()
     .subQuery()
     .select(['user_id'])
-    .from(User, 't_user')
+    .from(User, usersAliasName)
     .where('uuid = :uuid', {uuid : uuid})
     .execute();
     return result;
@@ -69,7 +69,7 @@ export class UserRepository extends Repository<User>{
     const [result] = await getConnection().createQueryBuilder()
       .subQuery()
       .select(['uuid'])
-      .from(User, 't_user')
+      .from(User, usersAliasName)
       .where('user_id = :user_id', {user_id : userId})
       .andWhere('user_password = :user_password', {user_password : userPassword})
       .execute();
@@ -118,7 +118,7 @@ export class UserRepository extends Repository<User>{
     const [result] = await getConnection().createQueryBuilder()
     .subQuery()
     .select(['user_name, user_nickname, user_phone_number'])
-    .from(User, "t_user")
+    .from(User, usersAliasName)
     .where('user_id = :user_id', {user_id : userId})
     .execute();
     return result;

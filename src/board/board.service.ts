@@ -1,29 +1,42 @@
-import { Injectable } from '@nestjs/common';
-import { CreateBoardDto } from './dto/create-board.dto';
-import { UpdateBoardDto } from './dto/update-board.dto';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { CreateBoardDto, UpdateBoardDto } from './dto';
 import { BoardRepository } from './board.repository';
-import { common } from '../util/common';
 
 @Injectable()
 export class BoardService {
-  constructor(private readonly boardRepository : BoardRepository){}
+  constructor(
+    private readonly boardRepository: BoardRepository
+  ) { }
 
-  async createPost(createBoardDto: CreateBoardDto, userId : any) : Promise<any>{
-    const {board_title, board_text, board_date} = createBoardDto;
-    const result = await this.boardRepository.createPost(userId.user_id, board_title, board_text, board_date);
-    const {affectedRows} = result;
-    return common.isSuccess(affectedRows);;
+  async createPost(createBoardDto: CreateBoardDto, userId: any): Promise<any> {
+    try {
+      const { boardTitle, boardText, boardDate } = createBoardDto;
+      const result = await this.boardRepository.createPost(userId, boardTitle, boardText, boardDate);
+      if(result)
+        return result;
+    } catch (error) {
+      console.error(error);
+      throw new BadRequestException();
+    }
+    
   }
 
-  async updatePost(updateBoardDto : UpdateBoardDto, user_id : string) : Promise<any>{
-    const {board_title, board_text, board_date} = updateBoardDto;
-    const result = await this.boardRepository.updatePost(user_id, board_title, board_text, board_date);
-    const {affectedRows} = result;
-    return common.isSuccess(affectedRows);
+  async updatePost(updateBoardDto: UpdateBoardDto, user_id: string): Promise<any> {
+    return 'e';
   }
 
-  getBoard(){
-
+  /**
+   * 게시글 모두 가져오기
+     * @returns 
+   */
+  async getAllPost(): Promise<any> {
+    try {
+      const result = await this.boardRepository.getAllPost();
+      return result;
+    } catch (error) {
+      console.error(error);
+      throw new BadRequestException();
+    }
   }
 
 

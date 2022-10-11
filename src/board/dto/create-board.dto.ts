@@ -1,13 +1,17 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { Expose } from "class-transformer";
 
 export class CreateBoardDto {
 
   @ApiProperty({description : `게시글 제목`})
-  readonly board_title : string;
+  @Expose({name : 'board_title'})
+  readonly boardTitle : string;
 
   @ApiProperty({description : `게시글 내용`})
-  readonly board_text : string;
+  @Expose({name : 'board_text'})
+  readonly boardText : string;
 
   @ApiProperty({description : `게시글 작성일`})
-  readonly board_date : string;
+  @Expose({name : 'board_date'})
+  readonly boardDate : string;
 }

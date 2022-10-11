@@ -1,9 +1,13 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { Expose } from "class-transformer";
+
 
 export class DeleteBoardDto {
   @ApiProperty({description : `사용자 아이디`})
-  readonly user_id : string;
+  @Expose({name : 'user_id'})
+  readonly userId : string;
 
   @ApiProperty({description : `게시글 번호`})
-  readonly board_id : number;
+  @Expose({name : 'board_id'})
+  readonly boardId : number;
 }
